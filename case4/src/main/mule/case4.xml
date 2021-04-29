@@ -33,14 +33,21 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 		<foreach doc:name="For Each" doc:id="a4151b2d-ce45-4f9c-8a8a-7ab25b40f585" collection="#[payload.body.getNewJobsResponse.return]">
 			<logger level="INFO" doc:name="Logger" doc:id="d922629b-d9f5-4763-99f0-606ca5ab05be" message="#[payload]"/>
 			<choice doc:name="Choice" doc:id="0b4b2bc8-108f-43a3-8950-566e2ea5cfdf" >
-				<when expression="#[payload.&quot;type&quot; == 'Repair']">
-					<logger level="INFO" doc:name="Logger" doc:id="5cd3a4b3-93a6-4ddf-bdd7-5f3069c176b1" message='#[payload."type"]'/>
-					<jms:publish doc:name='Queue "Urgent Jobs"' doc:id="ecf72327-66de-49e3-9231-ccce369364db" config-ref="JMS_Config" destination="group01.jobs.new" >
+				<when expression='#[payload."type" == "Repair"]'>
+					<logger level="INFO" doc:name="Logger" doc:id="5cd3a4b3-93a6-4ddf-bdd7-5f3069c176b1" message='#[message:"A Repair Job"]'/>
+					<jms:publish doc:name='Queue "Urgend Jobs"' doc:id="ecf72327-66de-49e3-9231-ccce369364db" config-ref="JMS_Config" destination="group01.jobs.new" >
 					</jms:publish>
 				</when>
 				<otherwise >
-					<logger level="INFO" doc:name="Logger" doc:id="a6e3264f-04ae-4c8d-89fb-71cacbea7a33" message='#[payload."type"]'/>
-					<jms:publish doc:name='Topic "Low Priority Jobs"' doc:id="5bdaca64-9a0f-4ffc-b79e-226cb89e6dfb" config-ref="JMS_Config" destination="group01.jobs.new"/>
+					<logger level="INFO" doc:name="Logger" doc:id="a6e3264f-04ae-4c8d-89fb-71cacbea7a33" message='#[message:"A Maintenance Job"]'/>
+					<jms:publish doc:name='Topic "Low Priority Jobs"' doc:id="390ba330-c7d9-4718-822a-2bcdbe3b924f" config-ref="JMS_Config" destination="group01.jobs.new" >
+						<jms:message >
+							<jms:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+payload]]]></jms:body>
+						</jms:message>
+					</jms:publish>
 				</otherwise>
 			</choice>
 		</foreach>
